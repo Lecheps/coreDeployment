@@ -1,0 +1,97 @@
+#----------------------------------------------------------------------
+# Environment
+MKDIR=mkdir
+CP=cp
+GREP=grep
+NM=nm
+CCADMIN=CCadmin
+CC=gcc
+CCC=g++
+CXX=g++
+FC=gfortran
+AS=as
+RM=rm
+AR=ar
+RANLIB=ranlib
+#----------------------------------------------------------------------
+# Macros
+CND_PLATFORM=Linux
+CND_DLIB_EXT=so
+CND_CONF=Release
+CND_DISTDIR=dist
+CND_BUILDDIR=build
+#----------------------------------------------------------------------
+# SOURCE FOLDERS
+BASEDIR=/home/jose-luis
+BOOSTDIR=$(BASEDIR)/boost_1_68_0
+TINYXMLDIR=$(BASEDIR)/tinyxml2
+INCASRC=${BASEDIR}/INCA/src
+INCAINC=${BASEDIR}/INCA/include
+SQLITEDIR=$(BASEDIR)/sqlite
+MODELINC=$(BASEDIR)/INCA/tests/persist
+#----------------------------------------------------------------------
+# LIBRARIES
+
+LIBINC=$(BASEDIR)/local/include
+LIBLIB=$(BASEDIR)/local/lib
+
+LDLIBS=-L$(BASEDIR)/local/lib -L$(BOOSTDIR)/stage/lib -L$(TINYXMLDIR)
+LDLIBSOPTIONS=-lcore -lboost_date_time -lboost_filesystem -lboost_system -ltinyxml2 -lpthread -ldl
+
+#Name of the binary
+NAMEBIN=snowModel
+
+# Object Directory
+OBJECTDIR=${MODELINC}/${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
+DISTDIR=${MODELINC}/${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
+
+#Object files
+OBJECTFILES= $(NAMEBIN).o
+
+#Compilation flags
+ifeq ($(CND_DLIB_EXT), so)
+	CCFLAGS=-O3
+	CXXFLAGS=-std=c++11 -O3 -fPIC
+else ifeq ($(CND_DLIB_EXT), a)
+	CCFLAGS=-O3
+	CXXFLAGS=-std=c++11 -O3
+endif
+
+#COMPILE
+COMPILE=$(CXX) -c $(CXXFLAGS)
+
+#Include directories
+INCLUDEDIRS=-I${INCAINC} -I${INCASRC} -I${TINYXMLDIR} -I${SQLITEDIR} -I${BOOSTDIR} -I$(LIBINC) -I$(MODELINC)
+
+vpath %.o $(OBJECTDIR)
+vpath %.cpp $(MODELINC)
+
+#Specifying install dir
+PREFIX=/home/jose-luis/local
+
+all: make_dir $(OBJECTFILES) $(NAMEBIN)
+
+#Creating directory for object files
+make_dir:
+	$(MKDIR) -p $(OBJECTDIR)
+	$(MKDIR) -p $(DISTDIR)
+	$(MKDIR) -p $(PREFIX)/bin
+
+#Compiling listed object files
+$(OBJECTFILES): test_persist.cpp
+	$(COMPILE) ${INCLUDEDIRS} $<  -o $(OBJECTDIR)/$@
+
+$(NAMEBIN): $(OBJECTFILES)
+	$(CXX) $(CXXFLAGS) -o $(DISTDIR)/$@ $(patsubst %,$(OBJECTDIR)/%,$(OBJECTFILES)) $(LDLIBS) $(LDLIBSOPTIONS)
+
+.PHONY: make_dir
+
+
+.PHONY : install
+install: $(NAMEBIN)
+	${MKDIR} -p ${PREFIX}/lib
+	${CP} $(DISTDIR)/$< ${PREFIX}/bin
+
+.PHONY : clean
+clean :
+	${RM} -rf ${OBJECTDIR}

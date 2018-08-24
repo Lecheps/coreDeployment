@@ -69,21 +69,19 @@ OBJECTFILES= \
 	Units.o
 
 # CC Compiler Flags
-CCFLAGS=-Wall -O3 -std=c++11
+
 
 ifeq ($(CND_DLIB_EXT), so)
+	CCFLAGS=-fPIC -O3
 	CXXFLAGS=-fPIC -std=c++11 -O3
 else ifeq ($(CND_DLIB_EXT), a)
+	CCFLAGS=-O3
 	CXXFLAGS=-std=c++11 -O3
 endif
 
 
 #COMPILE
 COMPILE=$(CXX) -c $(CXXFLAGS)
-
-#Specifying the name of the library:
-LIBSO=$(DISTDIR)/lib$(LIBNAME).so
-LIBA=$(DISTDIR)/lib$(LIBNAME).a
 
 vpath %.o $(OBJECTDIR)
 vpath %.cpp $(INCASRC)
@@ -103,7 +101,7 @@ $(OBJECTFILES):
 #Adding compilation unit for sqlite3
 
 $(OBJECTDIR)/sqlite.o: $(SQLITEDIR)/sqlite3.c
-	gcc $(CXXFLAGS) -c $(SQLITEDIR)/sqlite3.c -o $@
+	$(CC) $(CCFLAGS) -c $(SQLITEDIR)/sqlite3.c -o $@
 
 lib: $(LIBNAME)
 
@@ -118,7 +116,7 @@ else ifeq ($(CND_DLIB_EXT), a)
 endif
 
 #Install and clean
-PREFIX=/usr/local
+PREFIX=/home/jose-luis/local
 
 .PHONY : install
 install: $(LIBNAME)

@@ -1,0 +1,11 @@
+#!/bin/sh
+autocutsel -fork
+xrdb $HOME/.Xresources
+xsetroot -solid grey
+#export XKL_XMODMAP_DISABLE=1
+#metacity &
+#gnome-settings-daemon &
+#gnome-panel &
+#gnome-terminal &
+#gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:' &
+xfce4-session

@@ -1,0 +1,21 @@
+#!/usr/bin/expect -f
+
+if {[llength $argv] != 1} {
+ 
+# We give a message so the user know our syntax:
+puts "usage: /vnc.exp password "
+ 
+#We exit with return code = 1
+exit 1
+}
+ 
+set password [lindex $argv 0];
+
+set timeout 60
+
+spawn vncserver
+
+expect "?assword:" {send "$password\r"}
+expect "?erify:" {send "$password\r"}
+expect "Would you like*" {send "n\r"}
+expect eof

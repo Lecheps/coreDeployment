@@ -1,0 +1,99 @@
+#----------------------------------------------------------------------
+# Environment
+MKDIR=mkdir
+CP=cp
+GREP=grep
+NM=nm
+CCADMIN=CCadmin
+CC=gcc
+CCC=g++
+CXX=g++
+FC=gfortran
+AS=as
+RM=rm
+AR=ar
+RANLIB=ranlib
+#----------------------------------------------------------------------
+# Macros
+CND_PLATFORM=Linux
+CND_DLIB_EXT=so
+CND_CONF=Release
+CND_DISTDIR=dist
+CND_BUILDDIR=build
+#----------------------------------------------------------------------
+# SOURCE FOLDERS
+BASEDIR=/home/jose-luis
+BOOSTDIR=$(BASEDIR)/boost_1_68_0
+TINYXMLDIR=$(BASEDIR)/tinyxml2
+INCASRC=${BASEDIR}/INCA/src
+INCAINC=${BASEDIR}/INCA/include
+SQLITEDIR=$(BASEDIR)/sqlite
+#----------------------------------------------------------------------
+# Projects to be built
+LIBRARY=persist
+
+#----------------------------------------------------------------------
+# SETTINGS FOR THE COMPIUATION OF THE CORE
+# Object Directory
+OBJECTDIR=${BASEDIR}/INCA/examples/${LIBRARY}/${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
+DISTDIR=${BASEDIR}/INCA/examples/${LIBRARY}/${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
+#Object files
+OBJECTFILES= ${LIBRARY}.o
+
+# CC Compiler Flags
+CCFLAGS=-Wall -O3 -std=c++11
+ifeq ($(CND_DLIB_EXT), so)
+	CXXFLAGS=-fPIC -std=c++11 -O3
+else ifeq ($(CND_DLIB_EXT), a)
+	CXXFLAGS=-std=c++11 -O3
+endif
+
+#COMPILE
+COMPILE=$(CXX) -c $(CXXFLAGS)
+
+#Specifying the name of the library:
+LIBNAME=$(DISTDIR)/lib${LIBRARY}.$(CND_DLIB_EXT)
+
+vpath %.o $(OBJECTDIR)
+vpath %.cpp $(BASEDIR)/INCA/examples/${LIBRARY}
+
+.PHONY: make_dir
+all: make_dir $(LIBNAME)
+
+#Creating directory for object files
+make_dir:
+	$(MKDIR) -p $(OBJECTDIR)
+	$(MKDIR) -p $(DISTDIR)
+
+INCLUDE=-I${INCAINC} -I${INCASRC} -I${TINYXMLDIR} -I${SQLITEDIR} -I${BOOSTDIR}
+
+#Compiling listed object files
+$(OBJECTFILES): PersistModel.cpp
+	$(COMPILE) $(INCLUDE) $<  -o $(OBJECTDIR)/$(OBJECTFILES)
+
+#Archiving object files into library
+$(LIBNAME): $(OBJECTFILES)
+	$(RM) -f $(LIBNAME)
+ifeq ($(CND_DLIB_EXT), so)
+	$(CC) $(CXXFLAGS) -shared -o $(LIBNAME)  $(patsubst %,$(OBJECTDIR)/%,$(OBJECTFILES))
+else ifeq ($(CND_DLIB_EXT), a)
+	$(AR) -rv $(LIBNAME) $(patsubst %,$(OBJECTDIR)/%,$(OBJECTFILES))
+	$(RANLIB) $(LIBNAME)
+endif
+
+
+#Install and clean
+
+PREFIX=/home/jose-luis/local
+
+.PHONY : install
+install: $(LIBNAME)
+	${MKDIR} -p ${PREFIX}/lib
+	$(MKDIR) -p $(PREFIX)/include
+	${CP} $(LIBNAME) ${PREFIX}/lib/
+	$(CP) $(PWD)/*.h $(PREFIX)/include/
+
+.PHONY : clean
+clean :
+	${RM} -rf ${OBJECTDIR}
+	${RM} -f $(LIBNAME)
